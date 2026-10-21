@@ -10,5 +10,10 @@
 node_modules/
 npm-debug.log*
 
+# Playwright artifacts
+test-results/
+playwright-report/
+blob-report/
+
 # Local Kilo plan scratch space
 .kilo/plans/

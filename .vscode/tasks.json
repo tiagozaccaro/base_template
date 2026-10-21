@@ -7,7 +7,20 @@
       "command": "dx",
       "args": ["serve", "--package", "web"],
       "options": { "cwd": "${workspaceFolder}" },
-      "problemMatcher": []
+      "problemMatcher": {
+        "owner": "dx",
+        "pattern": {
+          "regexp": "^(?!)((.*))$",
+          "file": 1,
+          "message": 2
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*$",
+          "endsPattern": ".*(Serving|serving|Build completed|launching|listening|ready|localhost|8080).*"
+        }
+      },
+      "isBackground": true
     },
     {
       "label": "dx serve (desktop)",
@@ -15,7 +28,20 @@
       "command": "dx",
       "args": ["serve", "--package", "desktop"],
       "options": { "cwd": "${workspaceFolder}" },
-      "problemMatcher": []
+      "problemMatcher": {
+        "owner": "dx",
+        "pattern": {
+          "regexp": "^(?!)((.*))$",
+          "file": 1,
+          "message": 2
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*$",
+          "endsPattern": ".*(Serving|serving|Build completed|launching|listening|ready|localhost|8080).*"
+        }
+      },
+      "isBackground": true
     },
     {
       "label": "dx serve (mobile)",
@@ -23,7 +49,20 @@
       "command": "dx",
       "args": ["serve", "--package", "mobile"],
       "options": { "cwd": "${workspaceFolder}" },
-      "problemMatcher": []
+      "problemMatcher": {
+        "owner": "dx",
+        "pattern": {
+          "regexp": "^(?!)((.*))$",
+          "file": 1,
+          "message": 2
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*$",
+          "endsPattern": ".*(Serving|serving|Build completed|launching|listening|ready|localhost|8080).*"
+        }
+      },
+      "isBackground": true
     },
     {
       "label": "dx serve (fullstack web)",
@@ -31,7 +70,20 @@
       "command": "dx",
       "args": ["serve", "--package", "web", "--platform", "web", "--features", "web,server"],
       "options": { "cwd": "${workspaceFolder}" },
-      "problemMatcher": []
+      "problemMatcher": {
+        "owner": "dx",
+        "pattern": {
+          "regexp": "^(?!)((.*))$",
+          "file": 1,
+          "message": 2
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*$",
+          "endsPattern": ".*(Serving|serving|Build completed|launching|listening|ready|localhost|8080).*"
+        }
+      },
+      "isBackground": true
     }
   ]
 }

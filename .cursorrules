@@ -1,0 +1,6 @@
+
+# Rust Guidelines
+Follow Microsoft's Pragmatic Rust Guidelines for all Rust code. See:
+- `.kilo/skills/rust-guidelines/SKILL.md` (usage)
+- `.kilo/skills/rust-guidelines/references/all.txt` (full guidelines)
+- https://microsoft.github.io/rust-guidelines/

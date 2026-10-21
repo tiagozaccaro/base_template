@@ -159,6 +159,14 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Install cargo-deny
+        uses: taiki-e/install-action@cargo-deny
+        with:
+          tool: cargo-deny@0.20.2
+
+      - name: Check dependency licenses and policies
+        run: cargo deny check
+
   ci:
     name: ci
     if: always()
