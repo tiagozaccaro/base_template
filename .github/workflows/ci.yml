@@ -22,11 +22,11 @@ env:
 jobs:
   lint:
     name: lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -46,11 +46,11 @@ jobs:
 
   test:
     name: test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -72,17 +72,17 @@ jobs:
       matrix:
         include:
           - target: web-server
-            os: ubuntu-latest
+            os: ubuntu-24.04
             rustup_target: ""
             system_deps: false
             command: cargo build -p web --features web,server
           - target: web-client
-            os: ubuntu-latest
+            os: ubuntu-24.04
             rustup_target: wasm32-unknown-unknown
             system_deps: false
             command: cargo build -p web --target wasm32-unknown-unknown --features web
           - target: mobile
-            os: ubuntu-latest
+            os: ubuntu-24.04
             rustup_target: ""
             system_deps: true
             command: cargo build -p mobile --features mobile
@@ -93,7 +93,7 @@ jobs:
             command: cargo build -p desktop --features desktop
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -129,11 +129,11 @@ jobs:
 
   commitlint:
     name: commitlint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -144,11 +144,11 @@ jobs:
 
   security:
     name: security
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Audit dependencies
         uses: rustsec/audit-check@v2
@@ -159,7 +159,7 @@ jobs:
     name: ci
     if: always()
     needs: [lint, test, build, commitlint, security]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: Verify every required job succeeded
