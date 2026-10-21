@@ -146,6 +146,10 @@ jobs:
     name: security
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    permissions:
+      contents: read
+      # The audit action reports its result through a check run.
+      checks: write
     steps:
       - name: Checkout
         uses: actions/checkout@v7
