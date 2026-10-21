@@ -89,8 +89,9 @@ git push origin v0.1.0
 The `release` workflow then:
 
 1. Builds the web bundle and the desktop application with `dx build --release`.
-2. Publishes a container image for the web app to `ghcr.io`.
-3. Attaches the artifacts to a GitHub release.
+2. Packages them as `web-<tag>.tar.gz` and `desktop-<tag>-macos.zip`.
+3. Publishes a container image for the web app to `ghcr.io`.
+4. Attaches the artifacts to a GitHub release.
 
 The `release` GitHub environment holds the deployment secrets and is restricted to version
 tags. Mobile artifacts (apk/ipa) are optional and need the Android SDK/NDK, so they are
