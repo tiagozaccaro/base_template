@@ -1,0 +1,18 @@
+# Only the `dx` release bundle is needed by the Dockerfile; drop the rest of the
+# build output so the docker context stays small.
+target/debug
+target/*-apple-darwin
+target/*-unknown-linux-gnu
+target/*-unknown-freebsd
+target/wasm-dev
+target/wasm-release
+target/server-dev
+target/server-release
+target/dx/.captured-args
+target/dx/*/debug
+
+.git
+.github
+.kilo
+.vscode
+node_modules

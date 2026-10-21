@@ -1,0 +1,28 @@
+{
+  "version": "2.0.0",
+  "configurations": [
+    {
+      "name": "Debug Web (Brave)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8080",
+      "webRoot": "${workspaceFolder}",
+      "runtimeExecutable": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+      "preLaunchTask": "dx serve (web)"
+    },
+    {
+      "name": "Debug Mobile (Android emulator)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8080",
+      "preLaunchTask": "dx serve (mobile)"
+    },
+    {
+      "name": "Debug Mobile (iOS simulator)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8080",
+      "preLaunchTask": "dx serve (mobile)"
+    }
+  ]
+}
