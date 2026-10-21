@@ -14,3 +14,7 @@ dioxus = { version = "0.7.1" }
 # workspace
 ui = { path = "packages/ui" }
 api = { path = "packages/api" }
+
+# rust-ui dependencies
+tw_merge = { version = "0.1", features = ["debug"] }
+icons = { version = "0.18", features = ["dioxus", "dioxus_animated"] }

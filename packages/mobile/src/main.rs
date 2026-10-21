@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use ui::Navbar;
+use ui::{Login04, Navbar};
 use views::{Blog, Home};
 
 mod views;
@@ -11,6 +11,8 @@ enum Route {
     #[layout(MobileNavbar)]
     #[route("/")]
     Home {},
+    #[route("/login")]
+    Login {},
     #[route("/blog/:id")]
     Blog { id: i32 },
 }
@@ -44,6 +46,10 @@ fn MobileNavbar() -> Element {
                 "Home"
             }
             Link {
+                to: Route::Login {},
+                "Login"
+            }
+            Link {
                 to: Route::Blog { id: 1 },
                 "Blog"
             }
@@ -51,4 +57,9 @@ fn MobileNavbar() -> Element {
 
         Outlet::<Route> {}
     }
+}
+
+#[component]
+fn Login() -> Element {
+    rsx! { Login04 {} }
 }
