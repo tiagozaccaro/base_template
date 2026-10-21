@@ -2,13 +2,13 @@
 
 ## Branch policy
 
-`main` is protected. Direct pushes are rejected.
+`main` is protected. Direct pushes are rejected, including by administrators.
 
 | Rule | Value |
 | --- | --- |
 | Merges | Pull request only |
 | Required status checks | `ci`, `security` |
-| Required approvals | 1 (the owner may self-approve) |
+| Required approvals | 0, so a single maintainer can merge their own pull request |
 | Force pushes | Blocked |
 | Branch deletion | Blocked |
 | Stale approvals | Dismissed on new commits |
@@ -31,6 +31,10 @@ Feature branches are short lived and are deleted after the pull request is merge
 Prefer squash merge so the history on `main` stays linear and one commit maps to one
 change. Rebase merge is acceptable for long lived branches. The branch is deleted once the
 pull request is merged.
+
+GitHub does not let an author approve their own pull request, so no approving review is
+required. The `ci` and `security` checks plus the conversation resolution rule are what
+gate a merge. CODEOWNERS are still notified when `packages/api` or `packages/ui` change.
 
 ## Commit messages
 
