@@ -1,0 +1,212 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release (e.g. v0.1.0)"
+        required: true
+        type: string
+      mobile:
+        description: "Also build mobile artifacts (requires the Android SDK/NDK)"
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+  DX_VERSION: 0.7.10
+  RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+
+jobs:
+  web:
+    name: build web
+    # The container image is based on ubuntu:24.04, so the runner must provide
+    # the same glibc for the server binary to run inside it.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    environment: release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+          fetch-depth: 0
+
+      - name: Install Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Cache cargo build artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: release-web
+
+      - name: Install dx
+        uses: taiki-e/install-action@v2
+        with:
+          tool: dx@${{ env.DX_VERSION }}
+
+      - name: Build web bundle
+        run: dx build --package web --platform web --release --fullstack
+
+      - name: Upload web artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: web-${{ env.RELEASE_TAG }}
+          path: target/dx/web/release/web
+          if-no-files-found: error
+
+      - name: Log in to GitHub Container Registry
+        if: github.event_name == 'push'
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push container image
+        if: github.event_name == 'push'
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:${{ env.RELEASE_TAG }}
+            ghcr.io/${{ github.repository }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  desktop:
+    name: build desktop
+    runs-on: macos-latest
+    timeout-minutes: 60
+    environment: release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+          fetch-depth: 0
+
+      - name: Install Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Cache cargo build artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: release-desktop
+
+      - name: Install dx
+        uses: taiki-e/install-action@v2
+        with:
+          tool: dx@${{ env.DX_VERSION }}
+
+      - name: Build desktop bundle
+        run: dx build --package desktop --platform desktop --release
+
+      - name: Upload desktop artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: desktop-${{ env.RELEASE_TAG }}
+          path: target/dx/desktop/release
+          if-no-files-found: error
+
+  mobile:
+    name: build mobile
+    if: inputs.mobile
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    environment: release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+          fetch-depth: 0
+
+      - name: Install Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Cache cargo build artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: release-mobile
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Install Android NDK
+        run: sdkmanager "ndk;27.2.12479018" "platform-tools"
+
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk --locked
+
+      - name: Install dx
+        uses: taiki-e/install-action@v2
+        with:
+          tool: dx@${{ env.DX_VERSION }}
+
+      - name: Build android bundle
+        run: dx build --package mobile --platform android --release
+        env:
+          ANDROID_HOME: ${{ env.ANDROID_HOME }}
+          ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
+
+      - name: Upload mobile artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: mobile-${{ env.RELEASE_TAG }}
+          path: target/dx/mobile/release
+          if-no-files-found: error
+
+  release:
+    name: publish release
+    needs: [web, desktop, mobile]
+    if: always() && (needs.web.result == 'success' && needs.desktop.result == 'success' && (needs.mobile.result == 'success' || needs.mobile.result == 'skipped'))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - name: Download web artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: web-${{ env.RELEASE_TAG }}
+          path: artifacts/web
+
+      - name: Download desktop artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: desktop-${{ env.RELEASE_TAG }}
+          path: artifacts/desktop
+
+      - name: Download mobile artifacts
+        if: needs.mobile.result == 'success'
+        uses: actions/download-artifact@v8
+        with:
+          name: mobile-${{ env.RELEASE_TAG }}
+          path: artifacts/mobile
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: ${{ env.RELEASE_TAG }}
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(env.RELEASE_TAG, '-') }}
+          files: |
+            artifacts/web/**
+            artifacts/desktop/**
+            artifacts/mobile/**

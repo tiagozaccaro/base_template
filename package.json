@@ -1,0 +1,17 @@
+{
+  "name": "base-template",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Dioxus fullstack workspace with CI/CD and branch policy",
+  "license": "MIT",
+  "scripts": {
+    "lint:commit": "commitlint --from origin/main --to HEAD"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.6.1",
+    "@commitlint/config-conventional": "^19.6.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

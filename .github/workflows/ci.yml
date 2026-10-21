@@ -1,0 +1,185 @@
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache cargo build artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: lint
+
+      - name: Check formatting
+        run: cargo fmt --all --check
+
+      - name: Lint with clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+  test:
+    name: test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Cache cargo build artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: test
+
+      - name: Run tests
+        run: cargo test --workspace
+
+  build:
+    name: build (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: web-server
+            os: ubuntu-24.04
+            rustup_target: ""
+            system_deps: false
+            command: cargo build -p web --features web,server
+          - target: web-client
+            os: ubuntu-24.04
+            rustup_target: wasm32-unknown-unknown
+            system_deps: false
+            command: cargo build -p web --target wasm32-unknown-unknown --features web
+          - target: mobile
+            os: ubuntu-24.04
+            rustup_target: ""
+            system_deps: true
+            command: cargo build -p mobile --features mobile
+          - target: desktop
+            os: macos-latest
+            rustup_target: ""
+            system_deps: false
+            command: cargo build -p desktop --features desktop
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Add Rust target
+        if: matrix.rustup_target != ''
+        run: rustup target add ${{ matrix.rustup_target }}
+
+      - name: Install Linux system dependencies
+        if: matrix.system_deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libwebkit2gtk-4.1-dev \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            libxdo-dev \
+            libssl-dev \
+            build-essential \
+            pkg-config \
+            curl \
+            wget \
+            file
+
+      - name: Cache cargo build artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: build-${{ matrix.target }}
+
+      - name: Build ${{ matrix.target }}
+        run: ${{ matrix.command }}
+
+  commitlint:
+    name: commitlint
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Check commit messages
+        uses: wagoid/commitlint-github-action@v6
+        with:
+          configFile: commitlint.config.mjs
+
+  security:
+    name: security
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Audit dependencies
+        uses: rustsec/audit-check@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  ci:
+    name: ci
+    if: always()
+    needs: [lint, test, build, commitlint, security]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Verify every required job succeeded
+        env:
+          LINT_RESULT: ${{ needs.lint.result }}
+          TEST_RESULT: ${{ needs.test.result }}
+          BUILD_RESULT: ${{ needs.build.result }}
+          COMMITLINT_RESULT: ${{ needs.commitlint.result }}
+          SECURITY_RESULT: ${{ needs.security.result }}
+        run: |
+          status=0
+          check() {
+            if [ "$2" != "success" ]; then
+              echo "::error::$1 did not succeed (result: $2)"
+              status=1
+            fi
+          }
+          check lint "$LINT_RESULT"
+          check test "$TEST_RESULT"
+          check build "$BUILD_RESULT"
+          check commitlint "$COMMITLINT_RESULT"
+          check security "$SECURITY_RESULT"
+          exit $status

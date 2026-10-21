@@ -1,0 +1,37 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "dx serve (web)",
+      "type": "shell",
+      "command": "dx",
+      "args": ["serve", "--package", "web"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "dx serve (desktop)",
+      "type": "shell",
+      "command": "dx",
+      "args": ["serve", "--package", "desktop"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "dx serve (mobile)",
+      "type": "shell",
+      "command": "dx",
+      "args": ["serve", "--package", "mobile"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "dx serve (fullstack web)",
+      "type": "shell",
+      "command": "dx",
+      "args": ["serve", "--package", "web", "--platform", "web", "--features", "web,server"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    }
+  ]
+}
