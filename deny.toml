@@ -1,0 +1,45 @@
+# cargo-deny configuration for base_template
+
+[licenses]
+# Permissive licenses explicitly allowed for all dependencies.
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "CC0-1.0",
+    "Unlicense",
+    "Unicode-3.0",
+    "Zlib",
+    "BSL-1.0",
+    "CDLA-Permissive-2.0",
+]
+
+[bans]
+multiple-versions = "warn"
+# Crates pulled in at multiple versions by upstream Dioxus crates. These cannot
+# be deduplicated from this workspace, so they are skipped in duplicate
+# detection. The retained version is the newer one in each pair.
+skip = [
+    { crate = "thiserror@1.0.69", reason = "required by gloo-net, jni and ndk" },
+    { crate = "thiserror-impl@1.0.69", reason = "required by gloo-net, jni and ndk" },
+    { crate = "tungstenite@0.27.0", reason = "required by dioxus-fullstack" },
+    { crate = "winnow@0.7.15", reason = "required by manganis-core" },
+    { crate = "windows-sys@0.45.0", reason = "required by jni" },
+    { crate = "windows-sys@0.52.0", reason = "required by ring" },
+    { crate = "windows-targets@0.42.2", reason = "required by jni" },
+    { crate = "windows_aarch64_gnullvm@0.42.2", reason = "required by jni" },
+    { crate = "windows_aarch64_msvc@0.42.2", reason = "required by jni" },
+    { crate = "windows_i686_gnu@0.42.2", reason = "required by jni" },
+    { crate = "windows_i686_msvc@0.42.2", reason = "required by jni" },
+    { crate = "windows_x86_64_gnu@0.42.2", reason = "required by jni" },
+    { crate = "windows_x86_64_gnullvm@0.42.2", reason = "required by jni" },
+    { crate = "windows_x86_64_msvc@0.42.2", reason = "required by jni" },
+    { crate = "base64@0.22.1", reason = "required by dioxus-fullstack" },
+    { crate = "const-serialize@0.7.2", reason = "required by manganis-core" },
+    { crate = "const-serialize-macro@0.7.2", reason = "required by manganis-core" },
+    { crate = "convert_case@0.8.0", reason = "required by dioxus-core-macro" },
+    { crate = "getrandom@0.2.17", reason = "required by ring" },
+    { crate = "syn@2.0.119", reason = "required by dioxus-core-macro" },
+]
