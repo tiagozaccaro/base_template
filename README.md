@@ -6,6 +6,7 @@ Your new workspace contains a member crate for each of the web, desktop and mobi
 your_project/
 ├─ README.md
 ├─ Cargo.toml
+├─ package.json
 └─ packages/
    ├─ web/
    │  └─ ... # Web specific UI/logic
@@ -31,7 +32,7 @@ desktop/ # The desktop crate contains all platform specific UI, logic and depend
 │  ├─ views/ # The views each route will render in the desktop version of the app
 │  │  ├─ mod.rs # Defines the module for the views route and re-exports the components for each route
 │  │  ├─ blog.rs # The component that will render at the /blog/:id route
-│  │  ├─ home.rs # The component that will render at the / route
+│  │  └─ home.rs # The component that will render at the / route
 ├─ Cargo.toml # The desktop crate's Cargo.toml - This should include all desktop specific dependencies
 ```
 
@@ -48,7 +49,18 @@ ui/
 │  ├─ hero.rs # The Hero component that will be used in every platform
 │  ├─ echo.rs # The shared echo component that communicates with the server
 │  ├─ navbar.rs # The Navbar component that will be used in the layout of every platform's router
+│  ├─ button.rs # The Button component from rust-ui
+│  └─ card.rs # The Card component from rust-ui
 ```
+
+This template is integrated with [rust-ui](https://github.com/rust-ui/ui), a Shadcn-inspired component registry for Dioxus. The `ui` crate includes:
+
+- `tw_merge` for Tailwind CSS class merging
+- `icons` crate for Lucide icons
+- Tailwind CSS v4 with the rust-ui theme (design tokens, dark mode)
+- Example components: `Button`, `Card` (with `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`)
+
+To add more rust-ui components, copy them from the [registry](https://rust-ui.com/docs/components) into `packages/ui/src/` and re-export them from `lib.rs`.
 
 ## Shared backend logic
 
@@ -57,7 +69,7 @@ The workspace contains a `api` crate with shared backend logic. This crate defin
 ```
 api/
 ├─ src/
-│  ├─ lib.rs # Exports a server function that echos the input string
+│  └─ lib.rs # Exports a server function that echos the input string
 ```
 
 ### Serving Your App
@@ -73,3 +85,14 @@ and serve:
 dx serve
 ```
 
+The Tailwind CSS is built automatically by the Dioxus CLI. To manually build the CSS:
+
+```bash
+npm run css:build
+```
+
+To watch for CSS changes during development:
+
+```bash
+npm run css
+```

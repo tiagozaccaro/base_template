@@ -7,6 +7,10 @@ license = "MIT"
 [dependencies]
 dioxus = { workspace = true }
 api = { workspace = true }
+tw_merge = { workspace = true }
+icons = { workspace = true }
 
 [features]
+default = ["router"]
 server = ["api/server"]
+router = ["dioxus/router"]

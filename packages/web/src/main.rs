@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use ui::Navbar;
+use ui::{Login04, Navbar};
 use views::{Blog, Home};
 
 mod views;
@@ -11,8 +11,15 @@ enum Route {
     #[layout(WebNavbar)]
     #[route("/")]
     Home {},
+    #[route("/login")]
+    Login {},
     #[route("/blog/:id")]
     Blog { id: i32 },
+}
+
+#[component]
+fn Login() -> Element {
+    rsx! { Login04 {} }
 }
 
 const FAVICON: Asset = asset!("/assets/favicon.ico");
@@ -44,6 +51,10 @@ fn WebNavbar() -> Element {
             Link {
                 to: Route::Home {},
                 "Home"
+            }
+            Link {
+                to: Route::Login {},
+                "Login"
             }
             Link {
                 to: Route::Blog { id: 1 },
