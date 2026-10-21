@@ -25,6 +25,7 @@ permissions:
 env:
   CARGO_TERM_COLOR: always
   CARGO_INCREMENTAL: "0"
+  # Keep in sync with the dioxus version resolved in Cargo.lock.
   DX_VERSION: 0.7.10
   RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
 
@@ -52,9 +53,9 @@ jobs:
           key: release-web
 
       - name: Install dx
-        uses: taiki-e/install-action@v2
-        with:
-          tool: dx@${{ env.DX_VERSION }}
+        run: |
+          curl -sSfL https://dioxus.dev/install.sh | sh -s -- v${{ env.DX_VERSION }}
+          echo "$HOME/.dx/bin" >> "$GITHUB_PATH"
 
       - name: Build web bundle
         run: dx build --package web --platform web --release --fullstack
@@ -112,9 +113,9 @@ jobs:
           key: release-desktop
 
       - name: Install dx
-        uses: taiki-e/install-action@v2
-        with:
-          tool: dx@${{ env.DX_VERSION }}
+        run: |
+          curl -sSfL https://dioxus.dev/install.sh | sh -s -- v${{ env.DX_VERSION }}
+          echo "$HOME/.dx/bin" >> "$GITHUB_PATH"
 
       - name: Build desktop bundle
         run: dx build --package desktop --platform desktop --release
@@ -163,9 +164,9 @@ jobs:
         run: cargo install cargo-ndk --locked
 
       - name: Install dx
-        uses: taiki-e/install-action@v2
-        with:
-          tool: dx@${{ env.DX_VERSION }}
+        run: |
+          curl -sSfL https://dioxus.dev/install.sh | sh -s -- v${{ env.DX_VERSION }}
+          echo "$HOME/.dx/bin" >> "$GITHUB_PATH"
 
       - name: Build android bundle
         run: dx build --package mobile --platform android --release
