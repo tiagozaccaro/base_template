@@ -59,11 +59,15 @@ jobs:
       - name: Build web bundle
         run: dx build --package web --platform web --release --fullstack
 
+      - name: Package web bundle
+        run: |
+          tar -czf "$RUNNER_TEMP/web-${{ env.RELEASE_TAG }}.tar.gz" -C target/dx/web/release web
+
       - name: Upload web artifacts
         uses: actions/upload-artifact@v7
         with:
           name: web-${{ env.RELEASE_TAG }}
-          path: target/dx/web/release/web
+          path: ${{ runner.temp }}/web-${{ env.RELEASE_TAG }}.tar.gz
           if-no-files-found: error
 
       - name: Log in to GitHub Container Registry
@@ -115,11 +119,17 @@ jobs:
       - name: Build desktop bundle
         run: dx build --package desktop --platform desktop --release
 
+      - name: Package desktop bundle
+        run: |
+          ditto -c -k --sequesterRsrc --keepParent \
+            "target/dx/desktop/release/macos/Desktop.app" \
+            "$RUNNER_TEMP/desktop-${{ env.RELEASE_TAG }}-macos.zip"
+
       - name: Upload desktop artifacts
         uses: actions/upload-artifact@v7
         with:
           name: desktop-${{ env.RELEASE_TAG }}
-          path: target/dx/desktop/release
+          path: ${{ runner.temp }}/desktop-${{ env.RELEASE_TAG }}-macos.zip
           if-no-files-found: error
 
   mobile:
@@ -163,11 +173,15 @@ jobs:
           ANDROID_HOME: ${{ env.ANDROID_HOME }}
           ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
 
+      - name: Package mobile bundle
+        run: |
+          tar -czf "$RUNNER_TEMP/mobile-${{ env.RELEASE_TAG }}.tar.gz" -C target/dx/mobile/release .
+
       - name: Upload mobile artifacts
         uses: actions/upload-artifact@v7
         with:
           name: mobile-${{ env.RELEASE_TAG }}
-          path: target/dx/mobile/release
+          path: ${{ runner.temp }}/mobile-${{ env.RELEASE_TAG }}.tar.gz
           if-no-files-found: error
 
   release:
@@ -207,6 +221,5 @@ jobs:
           draft: false
           prerelease: ${{ contains(env.RELEASE_TAG, '-') }}
           files: |
-            artifacts/web/**
-            artifacts/desktop/**
-            artifacts/mobile/**
+            artifacts/**/*.tar.gz
+            artifacts/**/*.zip
